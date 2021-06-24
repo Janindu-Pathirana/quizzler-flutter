@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:quizzler/brain.dart';
+
 void main() => runApp(Quizzler());
 
 class Quizzler extends StatelessWidget {
@@ -19,6 +21,91 @@ class Quizzler extends StatelessWidget {
   }
 }
 
+Brain brain = Brain();
+
+int questionNum = 0;
+
+Text showQuestion() {
+  var text = "...END...";
+  if (questionNum < brain.questionLength()) {
+    text = brain.questions(questionNum).question;
+  }
+  return Text(
+    text,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      fontSize: 25.0,
+      color: Colors.white,
+    ),
+  );
+}
+
+class End extends StatefulWidget {
+  const End({Key key}) : super(key: key);
+
+  @override
+  _EndState createState() => _EndState();
+}
+
+class _EndState extends State<End> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: EndBody(),
+        ),
+      ),
+    );
+  }
+}
+
+class EndBody extends StatefulWidget {
+  const EndBody({Key key}) : super(key: key);
+
+  @override
+  _EndBodyState createState() => _EndBodyState();
+}
+
+class _EndBodyState extends State<EndBody> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          child: Text("End"),
+        ),
+        TextButton(child: Text("Try again"))
+      ],
+    );
+  }
+}
+
+void addIcon(bool ans) {
+  if (questionNum < brain.questionLength()) {
+    if (brain.questions(questionNum).answer == ans) {
+      score.add(
+        Icon(
+          Icons.check,
+          color: Colors.green,
+        ),
+      );
+    } else {
+      score.add(
+        Icon(
+          Icons.close,
+          color: Colors.red,
+        ),
+      );
+    }
+
+    questionNum++;
+  }
+}
+
+List<Widget> score = [];
+
 class QuizPage extends StatefulWidget {
   @override
   _QuizPageState createState() => _QuizPageState();
@@ -36,23 +123,16 @@ class _QuizPageState extends State<QuizPage> {
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Center(
-              child: Text(
-                'This is where the question text will go.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 25.0,
-                  color: Colors.white,
-                ),
-              ),
+              child: showQuestion(),
             ),
           ),
         ),
         Expanded(
           child: Padding(
             padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.green,
+            child: TextButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.green)),
               child: Text(
                 'True',
                 style: TextStyle(
@@ -61,7 +141,9 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked true.
+                setState(() {
+                  addIcon(true);
+                });
               },
             ),
           ),
@@ -69,8 +151,9 @@ class _QuizPageState extends State<QuizPage> {
         Expanded(
           child: Padding(
             padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              color: Colors.red,
+            child: TextButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red)),
               child: Text(
                 'False',
                 style: TextStyle(
@@ -79,11 +162,14 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked false.
+                setState(() {
+                  addIcon(false);
+                });
               },
             ),
           ),
         ),
+        Row(children: score),
         //TODO: Add a Row here as your score keeper
       ],
     );
